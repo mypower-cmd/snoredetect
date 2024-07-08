@@ -18,3 +18,6 @@ cfg.val = edict()
 # cfg.val.num_samples = 42608
 cfg.val.num_samples = 10651
 cfg.val.dataset = "./tfrecords/val.tfrecords"
+
+cfg.num_samples = 0
+cfg.num_samples_file_name = "../tfrecords/num_samples_data.npy"
