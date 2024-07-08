@@ -50,8 +50,6 @@ def feature_extracion(data_base_dir, data_save_dir):
         wav_file_names = os.listdir(pwd_train_dir)
         all_num += len(wav_file_names)
     print("all_num:", all_num)
-    m = np.array(all_num)
-    np.save(cfg.num_samples_file_name, m)  # 保存
     with tf.io.TFRecordWriter(data_save_dir) as trainwriter:
         for curr_train_dir in curr_train_dirs:
             print(curr_train_dir)
@@ -139,6 +137,8 @@ def feature_extracion(data_base_dir, data_save_dir):
                     index += 1
                     print("data process complete : " + str(index / all_num * 100) + '%')
         trainwriter.close()
+        m = np.array(index)
+        np.save(cfg.num_samples_file_name, m)  # 保存
 
 
 if __name__ == '__main__':
