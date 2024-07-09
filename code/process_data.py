@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from sklearn.preprocessing import StandardScaler   #实现z-score标准化
+from config import cfg
+
 # MFCC
 # train_data_dir = "D:/Project/snore/Snore_dataset_MFCC/train/"
 # val_data_dir = "D:/Project/snore/Snore_dataset_MFCC/val/"
@@ -149,26 +152,25 @@ def _parse_example(example_string):
     """
     # 浮点型数组时不能用FixedLenFeature，要用FixedLenSequenceFeature！！！！！！！
     feature_description = {
-        'data': tf.io.FixedLenSequenceFeature([], tf.float32,
-                                              allow_missing=True),
-        'label': tf.io.FixedLenFeature([], tf.int64)
+        'MFCC': tf.io.FixedLenFeature([42*12], tf.float32),
+        'LPCC': tf.io.FixedLenFeature([42*12], tf.float32),
+        'PLP': tf.io.FixedLenFeature([42*12], tf.float32),
+        'label': tf.io.FixedLenFeature([1], tf.int64)
     }
     feature_dict = tf.io.parse_example(example_string,
                                        feature_description)
 
-    # # 归一化
-    # data = feature_dict['data']
-    # wave_data = tf.cast(((data - tf.math.reduce_min(data)) / (tf.math.reduce_max(data) - tf.math.reduce_min(data))), tf.float32)
 
-    # 老师原本的归一化
-    # data = 10e5 * feature_dict['data']
+    MFCCs = tf.reshape(feature_dict['MFCC'], [42, 12, 1])
+    LPCCs = tf.reshape(feature_dict['LPCC'], [42, 12, 1])
+    PLPs = tf.reshape(feature_dict['PLP'], [42, 12, 1])
 
-    # PLP需要归一化？
-    # data = 10e4 * feature_dict['data']
-    # data = tf.reshape(data, [42, 12, 1])
+    std = StandardScaler()  # 训练数据，赋值给b_test
+    MFCCs = std.fit_transform(MFCCs)
+    LPCCs = std.fit_transform(LPCCs)
+    PLPs = std.fit_transform(PLPs)
 
-    # 实际上不用归一化也一样
-    data = tf.reshape(feature_dict['data'], [42, 12, 1])
+    data = MFCCs + LPCCs + PLPs
 
     labels = feature_dict['label']
     labels = tf.cast(labels, tf.int64)
@@ -181,13 +183,13 @@ def gen_data_batch(file_pattern, batch_size, num_repeat=1, is_training=True):
     dataset = files.flat_map(tf.data.TFRecordDataset)
     if is_training:
         dataset = dataset.repeat(num_repeat)
-        dataset = dataset.map(_parse_example, num_parallel_calls=4)
+        dataset = dataset.map(_parse_example, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(batch_size)
         dataset = dataset.shuffle(buffer_size=16 * batch_size)
         dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
     else:
         dataset = dataset.repeat(num_repeat)
-        dataset = dataset.map(_parse_example, num_parallel_calls=4)
+        dataset = dataset.map(_parse_example, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(batch_size)
         dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
 
@@ -199,6 +201,7 @@ if __name__ == '__main__':
     # gen_label_file(val_data_dir, label_val_txt)  # 验证集数据标签列表文件生成
     # gen_label_file(test_data_dir, label_test_txt)  # 测试集集数据标签列表文件生成
     # shuffle_label_file(label_train_txt, shuffle_label_train_txt)  # 对训练用数据标签文件顺序进行扰乱
-    gennerate_terecord_file(tfrecord_train, shuffle_label_train_txt)  # 训练数据tfrecord文件生成
-    gennerate_terecord_file(tfrecord_val, label_val_txt)  # 验证数据tfrecord文件生成
+    # gennerate_terecord_file(tfrecord_train, shuffle_label_train_txt)  # 训练数据tfrecord文件生成
+    # gennerate_terecord_file(tfrecord_val, label_val_txt)  # 验证数据tfrecord文件生成
     print(">>>>>>>>>>")
+    gen_data_batch(cfg.save_dir, cfg.batch_size, 1, is_training=True)
