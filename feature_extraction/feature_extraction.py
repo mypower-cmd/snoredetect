@@ -4,7 +4,7 @@ import pandas as pd
 import scipy.io.wavfile as wav
 from spafe.features import lpc
 from spafe.utils.preprocessing import SlidingWindow
-import librosa.display
+# import librosa.display
 import python_speech_features as psf
 from spafe.features import rplp
 import tensorflow as tf
@@ -20,8 +20,7 @@ from config import cfg
 # val_save_dir = "../tfrecords/"
 # test_save_dir = "../tfrecords/"
 
-data_dir = "../dataset/after_process/"
-save_dir = "../tfrecords/snore_dataset.tfrecords"
+
 
 def _bytes_feature(value):
     """Returns a bytes_list from a string / byte."""
@@ -62,6 +61,7 @@ def feature_extracion(data_base_dir, data_save_dir):
                 # python_speech_features特征提取
                 # 导入音频
                 (rate, sig) = wav.read(pwd_wav_file)
+                error_num = 0
                 try:
                     # MFCC
                     mfccs = psf.base.mfcc(
@@ -73,6 +73,7 @@ def feature_extracion(data_base_dir, data_save_dir):
                         nfft=2048,
                         preemph=0.85,
                         winfunc=np.hanning)
+                    error_num = 1
                     # LPCC
                     lpccs = lpc.lpcc(sig,
                                      fs=24000,
@@ -80,16 +81,19 @@ def feature_extracion(data_base_dir, data_save_dir):
                                      pre_emph=True,
                                      pre_emph_coeff=0.85,
                                      window=SlidingWindow(0.0853, 0.0853, "hanning"))
+                    error_num = 2
                     plps = rplp.plp(sig,
                                     fs=24000,
-                                    order=14,
+                                    order=13,
                                     pre_emph=True,
                                     pre_emph_coeff=0.85,
                                     window=SlidingWindow(0.0853, 0.0853, "hanning"),
                                     nfft=2048,
                                     fbanks=None)
+                    error_num = 3
                 except np.linalg.LinAlgError:
                     print("np.linalg.LinAlgError:", pwd_wav_file)
+                    print("error_num:", error_num)
                     continue
                 else:
                     # 取2-13维数据
@@ -113,10 +117,11 @@ def feature_extracion(data_base_dir, data_save_dir):
                     lpcc = lpccs.T
 
                     # 取2-13维数据
-                    plps = plps[:, 2:]
+                    plps = plps[:, 1:]
                     # PLP的数据不足补0
                     plps = np.array(plps)
                     plps = plps.T
+                    # print(np.shape(plps))
                     new_rol = np.zeros((12, 1), dtype=float)
                     while len(plps[0]) < 42:
                         plps = np.append(plps, new_rol, axis=1)
@@ -126,9 +131,9 @@ def feature_extracion(data_base_dir, data_save_dir):
                     print(label)
                     # print(np.shape(feature_data[2]))
                     feature = {
-                        'MFCC': _float_feature(mfcc.flatten()),
-                        'LPCC': _float_feature(lpcc.flatten()),
-                        'PLP': _float_feature(plp.flatten()),
+                        'MFCC': _float_feature(np.float32(mfcc.flatten())),
+                        'LPCC': _float_feature(np.float32(lpcc.flatten())),
+                        'PLP': _float_feature(np.float32(plp.flatten())),
                         'label': _int64_feature(label)
                     }
                     example = tf.train.Example(
@@ -144,4 +149,4 @@ def feature_extracion(data_base_dir, data_save_dir):
 if __name__ == '__main__':
     # transform(1, test_data_dir, test_save_dir)
     # transform(1, train_data_dir, train_save_dir)
-    feature_extracion(data_dir, save_dir)
+    feature_extracion(cfg.data_path, cfg.dataset_path)
