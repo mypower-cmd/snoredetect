@@ -5,12 +5,12 @@ cfg = edict()
 
 cfg.num_classes = 3
 cfg.epochs = 30
-cfg.batch_size = 256
+cfg.batch_size = 64
 cfg.save_mode_path = "soner_classify.h5"
 cfg.log_dir = ".\\logs\\" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 cfg.val_rate = 0.2
 cfg.test_rate = 0.1
-
+cfg.learning_rate = 1e-4
 
 # training options
 # cfg.train = edict()
@@ -24,8 +24,8 @@ cfg.test_rate = 0.1
 
 cfg.num_samples = 0
 cfg.data_path = "../dataset/after_process/"
-cfg.num_samples_file_name = "../tfrecords/num_samples_data.npy"
-cfg.dataset_path = "../tfrecords/snore_dataset.tfrecords"
+cfg.train_num_samples_path = "../tfrecords/num_samples_data.npy"
+cfg.train_dataset_path = "../tfrecords/snore_dataset.tfrecords"
 
-# cfg.num_samples_file_name = "../tfrecords/num_samples_data_all.npy"
-# cfg.save_dir = "../tfrecords/snore_dataset_all.tfrecords"
+cfg.save_num_samples_path = "../tfrecords/num_samples_data_all.npy"
+cfg.dataset_save_path = "../tfrecords/snore_dataset_all.tfrecords"

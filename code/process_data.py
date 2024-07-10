@@ -161,14 +161,16 @@ def _parse_example(example_string):
                                        feature_description)
 
 
-    MFCCs = tf.reshape(feature_dict['MFCC'], [42, 12, 1])
-    LPCCs = tf.reshape(feature_dict['LPCC'], [42, 12, 1])
-    PLPs = tf.reshape(feature_dict['PLP'], [42, 12, 1])
-
-    std = StandardScaler()  # 训练数据，赋值给b_test
-    MFCCs = std.fit_transform(MFCCs)
-    LPCCs = std.fit_transform(LPCCs)
-    PLPs = std.fit_transform(PLPs)
+    MFCCs = tf.reshape(feature_dict['MFCC'], [42, 12])
+    LPCCs = tf.reshape(feature_dict['LPCC'], [42, 12])
+    PLPs = tf.reshape(feature_dict['PLP'], [42, 12])
+    MFCCs = tf.convert_to_tensor(MFCCs, dtype=tf.float32)
+    LPCCs = tf.convert_to_tensor(LPCCs, dtype=tf.float32)
+    PLPs = tf.convert_to_tensor(PLPs, dtype=tf.float32)
+    # std = StandardScaler()  # 训练数据，赋值给b_test
+    # MFCCs = std.fit_transform(MFCCs)
+    # LPCCs = std.fit_transform(LPCCs)
+    # PLPs = std.fit_transform(PLPs)
 
     data = MFCCs + LPCCs + PLPs
 
@@ -185,7 +187,7 @@ def gen_data_batch(file_pattern, batch_size, num_repeat=1, is_training=True):
         dataset = dataset.repeat(num_repeat)
         dataset = dataset.map(_parse_example, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(batch_size)
-        dataset = dataset.shuffle(buffer_size=16 * batch_size)
+        dataset = dataset.shuffle(buffer_size=batch_size)
         dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
     else:
         dataset = dataset.repeat(num_repeat)
@@ -204,4 +206,4 @@ if __name__ == '__main__':
     # gennerate_terecord_file(tfrecord_train, shuffle_label_train_txt)  # 训练数据tfrecord文件生成
     # gennerate_terecord_file(tfrecord_val, label_val_txt)  # 验证数据tfrecord文件生成
     print(">>>>>>>>>>")
-    gen_data_batch(cfg.save_dir, cfg.batch_size, 1, is_training=True)
+    gen_data_batch(cfg.train_dataset_path, cfg.batch_size, 1, is_training=True)

@@ -80,7 +80,8 @@ def feature_extracion(data_base_dir, data_save_dir):
                                      order=13,
                                      pre_emph=True,
                                      pre_emph_coeff=0.85,
-                                     window=SlidingWindow(0.0853, 0.0853, "hanning"))
+                                     window=SlidingWindow(0.0853, 0.0853, "hanning"),
+                                     lifter=40)
                     error_num = 2
                     plps = rplp.plp(sig,
                                     fs=24000,
@@ -143,10 +144,10 @@ def feature_extracion(data_base_dir, data_save_dir):
                     print("data process complete : " + str(index / all_num * 100) + '%')
         trainwriter.close()
         m = np.array(index)
-        np.save(cfg.num_samples_file_name, m)  # 保存
+        np.save(cfg.save_num_samples_path, m)  # 保存
 
 
 if __name__ == '__main__':
     # transform(1, test_data_dir, test_save_dir)
     # transform(1, train_data_dir, train_save_dir)
-    feature_extracion(cfg.data_path, cfg.dataset_path)
+    feature_extracion(cfg.data_path, cfg.dataset_save_path)

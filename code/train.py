@@ -10,9 +10,11 @@ from model import *
 import os
 import pandas as pd
 sys.path.append("..")
-model = cnn_model()
+# model = cnn_model()
 # model = cnn_rnn_model()
 # model = rnn_model()
+import matplotlib
+matplotlib.use('TkAgg')
 
 
 class MySetLR(tf.keras.callbacks.Callback):
@@ -48,24 +50,32 @@ def GPU_Config():
 def train_and_val():
     # 配置GPU
     GPU_Config()
-    list_num_samples = np.load(cfg.num_samples_file_name)  # 读取
-    cfg.num_samples = list_num_samples[0]
-    print("num_samples:", cfg.num_samples )
 
-    dataset = gen_data_batch(cfg.dataset_path,
+    # 创建模型
+    model = cnn_model()
+
+
+    list_num_samples = np.load(cfg.train_num_samples_path)  # 读取
+    cfg.num_samples = list_num_samples
+    print("num_samples:", cfg.num_samples)
+
+    dataset = gen_data_batch(cfg.train_dataset_path,
                                    cfg.batch_size,
                                    1,
                                    is_training=True)
 
-    train_num = (cfg.train_num_samples*(1 - cfg.val_rate + cfg.test_rate))//cfg.batch_size
-    val_num = (cfg.train_num_samples * cfg.val_rate)//cfg.batch_size
-    test_num = (cfg.train_num_samples * cfg.test_rate)//cfg.batch_size
+    train_num =int((cfg.num_samples*(1 - cfg.val_rate - cfg.test_rate))//cfg.batch_size)
+    val_num = int((cfg.num_samples * cfg.val_rate)//cfg.batch_size)
+    test_num = int((cfg.num_samples * cfg.test_rate)//cfg.batch_size)
+    print("train_num", train_num)
+    print("val_num", val_num)
+    print("test_num", test_num)
     train_data = dataset.take(train_num)
     temp_data = dataset.skip(train_num)
     val_data = temp_data.take(val_num)
     test_data = temp_data.skip(val_num)
 
-    optimizer = tf.keras.optimizers.Adam(lr=cfg.train.learning_rate)
+    optimizer = tf.keras.optimizers.Adam(lr=cfg.learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
 
@@ -80,7 +90,7 @@ def train_and_val():
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
-    model_path = "/home/lsb/project/Sleep_Stage/model/" + "sleep_classify_" + datetime.datetime.now(
+    model_path = "../model/" + "sleep_classify_" + datetime.datetime.now(
     ).strftime("%m%d_%H%M%S") + ".h5"
 
     # 配置回调函数
@@ -94,8 +104,12 @@ def train_and_val():
                         batch_size=cfg.batch_size,
                         callbacks=callbacks,
                         validation_data=val_data,
-                        steps_per_epoch=train_num,
-                        validation_steps=val_num)
+                        shuffle=True,
+                        verbose=1,
+                        validation_freq=1,
+                        # steps_per_epoch=train_num,
+                        # validation_steps=val_num
+                        )
     #创建保存文件路径
     folder_path = "../results/"
     if not os.path.exists(folder_path):
@@ -131,7 +145,7 @@ def train_and_val():
 
 
     print('-----------test--------')
-    test_loss, test_acc = model.evaluate(test_data, steps=test_numt, verbose=1)
+    test_loss, test_acc = model.evaluate(test_data, steps=test_num, verbose=1)
     print('测试准确率：', test_acc)
     print('测试损失', test_loss)
 
