@@ -166,7 +166,7 @@ def _parse_example(example_string):
     PLPs = tf.reshape(feature_dict['PLP'], [42, 12])
     MFCCs = tf.convert_to_tensor(MFCCs, dtype=tf.float32)
     LPCCs = tf.convert_to_tensor(LPCCs, dtype=tf.float32)
-    PLPs = tf.convert_to_tensor(PLPs, dtype=tf.float32)
+    PLPs  = tf.convert_to_tensor(PLPs, dtype=tf.float32)
     # std = StandardScaler()  # 训练数据，赋值给b_test
     # MFCCs = std.fit_transform(MFCCs)
     # LPCCs = std.fit_transform(LPCCs)
@@ -196,7 +196,25 @@ def gen_data_batch(file_pattern, batch_size, num_repeat=1, is_training=True):
         dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
 
     return dataset
+def gen_valdata_batch(file_pattern, batch_size):
+    files = tf.data.Dataset.list_files(file_pattern)
+    dataset = files.flat_map(tf.data.TFRecordDataset)
+    dataset = dataset.repeat(1)
+    dataset = dataset.map(_parse_example, num_parallel_calls=tf.data.AUTOTUNE)
+    dataset = dataset.batch(batch_size)
+    # dataset = dataset.shuffle(buffer_size=batch_size)
+    dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+    return dataset
 
+
+def get_truelabel(file_path):
+    dataset = tf.data.TFRecordDataset(file_path)
+    dataset = dataset.map(map_func=_parse_example)
+    truelabel = []
+    for data,label in dataset:
+        label = np.int64(label)
+        truelabel.extend(label)
+    return truelabel
 
 if __name__ == '__main__':
     # gen_label_file(train_data_dir, label_train_txt)  # 训练集数据标签列表文件生成

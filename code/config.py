@@ -5,7 +5,7 @@ cfg = edict()
 
 cfg.num_classes = 3
 cfg.epochs = 30
-cfg.batch_size = 64
+cfg.batch_size = 256
 cfg.save_mode_path = "soner_classify.h5"
 cfg.log_dir = ".\\logs\\" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 cfg.val_rate = 0.2
