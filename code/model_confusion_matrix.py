@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 path_tfrecords = cfg.train_dataset_path
-predict_model = tf.keras.models.load_model('../model/sleep_classify_0710_213128_MFCCs+LPCCs+PLPs_cnn_rnn.h5', compile=True) #  注意这儿得compile需要设置为true，如果你不设置你需要多一步compile的过程。
+predict_model = tf.keras.models.load_model('../model/sleep_classify_0723_212738.h5', compile=True) #  注意这儿得compile需要设置为true，如果你不设置你需要多一步compile的过程。
 test_dataset = gen_valdata_batch(path_tfrecords, cfg.batch_size)
 
 # dataset = test_dataset

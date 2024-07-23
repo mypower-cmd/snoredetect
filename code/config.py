@@ -24,8 +24,11 @@ cfg.learning_rate = 1e-4
 
 cfg.num_samples = 0
 cfg.data_path = "../dataset/after_process/"
-cfg.train_num_samples_path = "../tfrecords/num_samples_data.npy"
-cfg.train_dataset_path = "../tfrecords/snore_dataset.tfrecords"
+# cfg.train_num_samples_path = "../tfrecords/num_samples_data.npy"
+# cfg.train_dataset_path = "../tfrecords/snore_dataset.tfrecords"
+cfg.train_num_samples_path = "../tfrecords/num_samples_data_all.npy"
+cfg.train_dataset_path = "../tfrecords/snore_dataset_all.tfrecords"
 
-cfg.save_num_samples_path = "../tfrecords/num_samples_data_all.npy"
-cfg.dataset_save_path = "../tfrecords/snore_dataset_all.tfrecords"
+
+cfg.save_num_samples_path = "../tfrecords/num_samples_data_all_2.npy"
+cfg.dataset_save_path = "../tfrecords/snore_dataset_all_2.tfrecords"

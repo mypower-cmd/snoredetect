@@ -52,7 +52,7 @@ def train_and_val():
     GPU_Config()
 
     # 创建模型
-    model = rnn_model()
+    model = cnn_model()
 
 
     list_num_samples = np.load(cfg.train_num_samples_path)  # 读取

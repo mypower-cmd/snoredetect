@@ -172,7 +172,8 @@ def _parse_example(example_string):
     # LPCCs = std.fit_transform(LPCCs)
     # PLPs = std.fit_transform(PLPs)
 
-    data = MFCCs + LPCCs + PLPs
+    # data = MFCCs + LPCCs + PLPs
+    data = PLPs
 
     labels = feature_dict['label']
     labels = tf.cast(labels, tf.int64)
