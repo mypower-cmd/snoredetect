@@ -1,35 +1,29 @@
-import tensorflow as tf
 import matplotlib.pyplot as plt
-from tensorflow.python.keras import backend as K
-import numpy as np
 import datetime
-from tensorflow.keras.callbacks import (ReduceLROnPlateau, TensorBoard)
+# from tensorflow.keras.callbacks import (ReduceLROnPlateau)
 import sys
-from process_data import gen_data_batch
+from process_data import *
 from model import *
 import os
 import pandas as pd
-sys.path.append("..")
-# model = cnn_model()
-# model = cnn_rnn_model()
-# model = rnn_model()
+# sys.path.append("..")
 import matplotlib
 matplotlib.use('TkAgg')
 
 
-class MySetLR(tf.keras.callbacks.Callback):
-
-    def on_epoch_begin(self, epoch, logs=None):
-        # 学习率控制
-        learning_rate = model.optimizer.lr.numpy().astype(np.float64)
-        if epoch < 8:
-            lr = learning_rate
-        else:
-            lr = learning_rate * np.exp(0.1 * (8 - epoch))
-        K.set_value(model.optimizer.lr, lr)
-        print(
-            'Epoch %03d: LearningRateScheduler reducing learning rate to %s.' %
-            (epoch + 1, lr))
+# class MySetLR(tf.keras.callbacks.Callback):
+#
+#     def on_epoch_begin(self, epoch, logs=None):
+#         # 学习率控制
+#         learning_rate = model.optimizer.lr.numpy().astype(np.float64)
+#         if epoch < 8:
+#             lr = learning_rate
+#         else:
+#             lr = learning_rate * np.exp(0.1 * (8 - epoch))
+#         K.set_value(model.optimizer.lr, lr)
+#         print(
+#             'Epoch %03d: LearningRateScheduler reducing learning rate to %s.' %
+#             (epoch + 1, lr))
 
 
 #配置GPU，限制GPU内存增长
@@ -52,11 +46,11 @@ def train_and_val():
     GPU_Config()
 
     # 创建模型
-    model = cnn_model()
+    model = cnn_rnn_model()
 
 
     list_num_samples = np.load(cfg.train_num_samples_path)  # 读取
-    cfg.num_samples = list_num_samples
+    cfg.num_samples = list_num_samples[0] + list_num_samples[1]
     print("num_samples:", cfg.num_samples)
 
     dataset = gen_data_batch(cfg.train_dataset_path,
@@ -66,14 +60,14 @@ def train_and_val():
 
     train_num =int((cfg.num_samples*(1 - cfg.val_rate - cfg.test_rate))//cfg.batch_size)
     val_num = int((cfg.num_samples * cfg.val_rate)//cfg.batch_size)
-    test_num = int((cfg.num_samples * cfg.test_rate)//cfg.batch_size)
+    # test_num = int((cfg.num_samples * cfg.test_rate)//cfg.batch_size)
     print("train_num", train_num)
     print("val_num", val_num)
-    print("test_num", test_num)
+    # print("test_num", test_num)
     train_data = dataset.take(train_num)
-    temp_data = dataset.skip(train_num)
-    val_data = temp_data.take(val_num)
-    test_data = temp_data.skip(val_num)
+    val_data = dataset.skip(train_num)
+    # val_data = temp_data.take(val_num)
+    # test_data = temp_data.skip(val_num)
 
     optimizer = tf.keras.optimizers.Adam(lr=cfg.learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -142,10 +136,13 @@ def train_and_val():
     plt.savefig(result_png)
     plt.show()
 
-
+    dataset_test = gen_data_batch(cfg.test_dataset_path,
+                                   cfg.batch_size,
+                                   1,
+                                   is_training=False)
 
     print('-----------test--------')
-    test_loss, test_acc = model.evaluate(test_data, steps=test_num, verbose=1)
+    test_loss, test_acc = model.evaluate(dataset_test, verbose=1)
     print('测试准确率：', test_acc)
     print('测试损失', test_loss)
 
@@ -157,3 +154,7 @@ def train_and_val():
 
 if __name__ == '__main__':
     train_and_val()
+    # list_num_samples = np.load("../tfrecords/num_samples_data_include_test.npy")  # 读取
+    # data = list_num_samples
+    # print("train_samples:", data[0])
+    # print("test_samples:", data[1])

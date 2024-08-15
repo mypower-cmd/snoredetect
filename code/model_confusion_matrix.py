@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')
 
-path_tfrecords = cfg.train_dataset_path
-predict_model = tf.keras.models.load_model('../model/sleep_classify_0723_212738.h5', compile=True) #  注意这儿得compile需要设置为true，如果你不设置你需要多一步compile的过程。
+path_tfrecords = "../tfrecords/snore_dataset_test.tfrecords"
+predict_model = tf.keras.models.load_model('../model/sleep_classify_0815_224531_MFCCs_cnn_rnn.h5', compile=True) #  注意这儿得compile需要设置为true，如果你不设置你需要多一步compile的过程。
 test_dataset = gen_valdata_batch(path_tfrecords, cfg.batch_size)
 
 # dataset = test_dataset
@@ -46,7 +46,7 @@ y_true = get_truelabel(path_tfrecords)
 #     truelabel.extend(label)
 # y_true = truelabel
 
-confusionmatrix = confusion_matrix( y_true, y_predict ) #行的标签代表真实值，列的标签代表预测值
+confusionmatrix = confusion_matrix(y_true, y_predict ) #行的标签代表真实值，列的标签代表预测值
 print(confusionmatrix)
 TP0 = confusionmatrix[0][0]
 TN0 = confusionmatrix[1][1] + confusionmatrix[1][2] + confusionmatrix[2][1] + confusionmatrix[2][2]
@@ -69,6 +69,7 @@ print("Accuracy:", Accuracy)
 P0 = TP0 / (TP0 + FP0)
 P1 = TP1 / (TP1 + FP1)
 P2 = TP2 / (TP2 + FP2)
+# P0 = 0
 Precision = (P0 + P1 + P2) / 3
 print("Precision:", Precision)
 

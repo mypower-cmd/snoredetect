@@ -8,7 +8,7 @@ cfg.epochs = 30
 cfg.batch_size = 256
 cfg.save_mode_path = "soner_classify.h5"
 cfg.log_dir = ".\\logs\\" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-cfg.val_rate = 0.2
+cfg.val_rate = 0.1
 cfg.test_rate = 0.1
 cfg.learning_rate = 1e-4
 
@@ -26,9 +26,17 @@ cfg.num_samples = 0
 cfg.data_path = "../dataset/after_process/"
 # cfg.train_num_samples_path = "../tfrecords/num_samples_data.npy"
 # cfg.train_dataset_path = "../tfrecords/snore_dataset.tfrecords"
-cfg.train_num_samples_path = "../tfrecords/num_samples_data_all.npy"
-cfg.train_dataset_path = "../tfrecords/snore_dataset_all.tfrecords"
+# cfg.train_num_samples_path = "../tfrecords/num_samples_data_all.npy"
+# cfg.train_dataset_path = "../tfrecords/snore_dataset_all.tfrecords"
 
 
-cfg.save_num_samples_path = "../tfrecords/num_samples_data_all_2.npy"
-cfg.dataset_save_path = "../tfrecords/snore_dataset_all_2.tfrecords"
+cfg.train_num_samples_path = "../tfrecords/num_samples_data_include_test.npy"
+cfg.train_dataset_path = "../tfrecords/snore_dataset_train.tfrecords"
+cfg.test_dataset_path = "../tfrecords/snore_dataset_test.tfrecords"
+
+# cfg.save_num_samples_path = "../tfrecords/num_samples_data_all_2.npy"
+# cfg.dataset_save_path = "../tfrecords/snore_dataset_all_2.tfrecords"
+
+cfg.save_num_samples_path = "../tfrecords/num_samples_data_include_test.npy"
+cfg.train_dataset_save_path = "../tfrecords/snore_dataset_train.tfrecords"
+cfg.test_dataset_save_path = "../tfrecords/snore_dataset_test.tfrecords"
